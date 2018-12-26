@@ -143,21 +143,21 @@ class client(object):
 		self.logFile("raw", data)
 		data = self.decrypt(data)
 		if data == None:
-			print "{0} Decrypt failed".format(self.time)
+			print("{0} Decrypt failed".format(self.time))
 			return None
 		self.logFile("decrypted", data)
 		#Uncompress
 		unComp = None
 		unCompLen = struct.unpack("I", data[:4])[0]
 		if unCompLen == 0:
-			print "{0} No data to uncompress".format(self.time)
+			print("{0} No data to uncompress".format(self.time))
 			return None
 		try:
 			unComp = zlib.decompress(data[4:])
 		except Exception as e:
-			print e
+			print(e)
 		if unComp == None:
-			print "{0} Decompressing data failed".format(self.time)
+			print("{0} Decompressing data failed".format(self.time))
 			return None
 		self.logFile("inner", unComp)
 		#Convert to protobuf
@@ -165,7 +165,7 @@ class client(object):
 		try:
 			res.ParseFromString(unComp)
 		except Exception as e:
-			print "{0} Converting to protobuf failed: {1}".format(self.time, e)
+			print("{0} Converting to protobuf failed: {1}".format(self.time, e))
 			return None
 	#print MessageToJson(res)
 		return res
@@ -173,7 +173,7 @@ class client(object):
 	def loaderHandler(self, data):
 		crc = binascii.crc32(data) & 0xffffffff
 		self.logFile("loader", data)
-		print "{0} New loader CRC32:{1}".format(self.time, crc)
+		print("{0} New loader CRC32:{1}".format(self.time, crc))
 	
 	def moduleHandler(self, data):
 		offset = 0
@@ -185,16 +185,16 @@ class client(object):
 			module = emotet_pb2.Module()
 			module.ParseFromString(data[start:end])
 			self.logFile(str(module.type), module.data)
-			print "{0} Got module with type: {1}".format(self.time, module.type)
+			print("{0} Got module with type: {1}".format(self.time, module.type))
 
 	def start(self):
 		request = self.getReqMessage()
 		for server in self.conf["C2List"]:
 			self.time = datetime.now().strftime('%Y%m%d_%H%M%S')
-			print "{0} Connecting to: {1}".format(self.time, server)
+			print("{0} Connecting to: {1}".format(self.time, server))
 			response = self.sendMsg(server, request)
 			if response:
-				print "{0} Response len: {1}".format(self.time, len(response))
+				print("{0} Response len: {1}".format(self.time, len(response)))
 				res = self.responseHandler(response)
 				if res:
 					if res.data:
@@ -202,7 +202,7 @@ class client(object):
 					if res.modules:
 						self.moduleHandler(res.modules)
 			else:
-				print "{0} No response data".format(self.time)
+				print("{0} No response data".format(self.time))
 
 	def logFile(self, fileType, file):
 		h = SHA256.new()
